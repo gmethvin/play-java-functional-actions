@@ -24,22 +24,15 @@ import play.mvc.*;
  * A functional controller class that can be extended directly by users
  */
 public class FunctionalController extends Results implements FunctionalControllerHelpers {
-    private BodyParser.Default defaultBodyParser;
     private Executor executor;
 
     @Inject
-    public FunctionalController(BodyParser.Default defaultBodyParser, Executor executor) {
-        this.defaultBodyParser = defaultBodyParser;
+    public FunctionalController(Executor executor) {
         this.executor = executor;
     }
 
     @Override
     public Executor actionExecutor() {
         return executor;
-    }
-
-    @Override
-    public BodyParser<Object> defaultBodyParser() {
-        return defaultBodyParser;
     }
 }

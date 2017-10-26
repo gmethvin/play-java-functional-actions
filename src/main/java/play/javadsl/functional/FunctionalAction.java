@@ -17,24 +17,28 @@
 package play.javadsl.functional;
 
 import akka.util.*;
+
 import java.util.concurrent.*;
 import java.util.function.*;
+
 import play.mvc.*;
 import play.libs.streams.*;
 
-public abstract class FunctionalAction<A> extends EssentialAction {
+public abstract class FunctionalAction<B> extends EssentialAction {
 
     /**
+     * Apply the action to the body
      *
      * @param request the request
+     * @param body the parsed body of the request
      * @return the future result of this action after parsing the body and running the action function
      */
-    public abstract CompletionStage<Result> apply(Http.Request request);
+    public abstract CompletionStage<Result> apply(Http.Request request, B body);
 
     /**
      * @return the BodyParser used by this action
      */
-    public abstract BodyParser<A> bodyParser();
+    public abstract BodyParser<B> bodyParser();
 
     /**
      * @return the Executor used to execute the action body
@@ -54,9 +58,9 @@ public abstract class FunctionalAction<A> extends EssentialAction {
                 Result result = either.left.get();
                 return CompletableFuture.completedFuture(result);
             } else {
-                A body = either.right.get();
+                B body = either.right.get();
                 Http.Request request = new Http.RequestImpl(requestHeader.asScala().withBody(body));
-                return apply(request);
+                return apply(request, body);
             }
         }, executor());
     }
@@ -64,19 +68,19 @@ public abstract class FunctionalAction<A> extends EssentialAction {
     /**
      * Convenience method for creating a FunctionalAction from a function
      */
-    public static <A> FunctionalAction<A> create(
-        BodyParser<A> parser,
+    public static <B> FunctionalAction<B> create(
+        BodyParser<B> parser,
         Executor executor,
-        Function<Http.Request, CompletionStage<Result>> func
+        BiFunction<Http.Request, B, CompletionStage<Result>> func
     ) {
-        return new FunctionalAction<A>() {
+        return new FunctionalAction<B>() {
             @Override
-            public CompletionStage<Result> apply(Http.Request request) {
-                return func.apply(request);
+            public CompletionStage<Result> apply(Http.Request request, B body) {
+                return func.apply(request, body);
             }
 
             @Override
-            public BodyParser<A> bodyParser() {
+            public BodyParser<B> bodyParser() {
                 return parser;
             }
 
@@ -86,4 +90,5 @@ public abstract class FunctionalAction<A> extends EssentialAction {
             }
         };
     }
+
 }

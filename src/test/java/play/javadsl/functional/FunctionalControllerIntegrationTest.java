@@ -20,6 +20,7 @@ import org.junit.Test;
 import play.Application;
 import play.api.routing.Router;
 import play.inject.guice.GuiceApplicationBuilder;
+import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.test.Helpers;
@@ -42,7 +43,7 @@ public class FunctionalControllerIntegrationTest extends WithServer {
     }
 
     @Test
-    public void testControllerRequest() {
+    public void testControllerGet() {
         Http.RequestBuilder request = Helpers.fakeRequest()
                 .method(GET)
                 .uri("/");
@@ -50,5 +51,17 @@ public class FunctionalControllerIntegrationTest extends WithServer {
         Result result = route(app, request);
         final String body = contentAsString(result);
         assertThat(body, containsString("Hello World"));
+    }
+
+    @Test
+    public void testControllerPostJson() {
+        Http.RequestBuilder request = Helpers.fakeRequest()
+                .method(POST)
+                .uri("/echo")
+                .bodyJson(Json.parse("{ \"foo\": 10 }"));
+
+        Result result = route(app, request);
+        final String body = contentAsString(result);
+        assertThat(body, containsString("{\"foo\":10}"));
     }
 }

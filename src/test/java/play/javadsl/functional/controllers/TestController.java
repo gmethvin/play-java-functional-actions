@@ -16,19 +16,32 @@
 
 package play.javadsl.functional.controllers;
 
-import play.javadsl.functional.*;
-import javax.inject.Inject;
+import akka.Done;
+import com.fasterxml.jackson.databind.JsonNode;
+import play.javadsl.functional.FunctionalAction;
+import play.javadsl.functional.FunctionalController;
 import play.mvc.BodyParser;
+
+import javax.inject.Inject;
 import java.util.concurrent.Executor;
 
 public class TestController extends FunctionalController {
 
+    private BodyParser.Json jsonParser;
+
     @Inject
-    public TestController(BodyParser.Default parser, Executor executor) {
-        super(parser, executor);
+    public TestController(BodyParser.Json jsonParser, Executor executor) {
+        super(executor);
+        this.jsonParser = jsonParser;
     }
 
-    public FunctionalAction index() {
-        return action(request -> ok("Hello World"));
+    public FunctionalAction<Done> index() {
+        return action(req -> ok("Hello World"));
+    }
+
+    public FunctionalAction<JsonNode> echo() {
+        return action(jsonParser, (req, jsonNode) ->
+            ok(jsonNode).withHeaders("Foo", "Bar")
+        );
     }
 }

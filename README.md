@@ -10,20 +10,31 @@ Currently, Java action functionality in Play is actually provided by some Scala 
 
 Using `EssentialAction` for Java actions directly is much more straightforward to understand, and allows us to use the same action composition logic as with Scala Actions. We still need to provide a Java API for it to feel idiomatic, but it is much easier to wrap the Scala API with a functional Java API than to implement the current Java `Action` using annotations.
 
-## Implementation
+## Example
 
-The current implementation uses a `FunctionalController` that provides an `action` and an `async` method for methods returning `Result` and `CompletionStage<Result>` respectively. For example:
+The current implementation uses a `FunctionalController` that provides an `action` and an `async` method for methods returning `Result` and `CompletionStage<Result>` respectively. By default, if a body parser is not passed as the first argument, an empty body parser is used, which returns `akka.Done`.
+
+For example:
 
 ```java
 public class TestController extends FunctionalController {
 
+    private BodyParser.Json jsonParser;
+
     @Inject
-    public TestController(BodyParser.Default parser, Executor executor) {
-        super(parser, executor);
+    public TestController(BodyParser.Json jsonParser, Executor executor) {
+        super(executor);
+        this.jsonParser = jsonParser;
     }
 
-    public FunctionalAction index() {
-        return action(request -> ok("Hello World"));
+    public FunctionalAction<Done> index() {
+        return action(req -> ok("Hello World"));
+    }
+
+    public FunctionalAction<JsonNode> echo() {
+        return action(jsonParser, (req, jsonNode) ->
+            ok(jsonNode).withHeaders("Foo", "Bar")
+        );
     }
 }
 ```
