@@ -1,4 +1,3 @@
-import play.sbt.routes.RoutesKeys
 
 name := "play-java-functional-actions"
 organization := "io.methvin"
@@ -19,6 +18,7 @@ lazy val root = (project in file("."))
 
 libraryDependencies ++= Seq(
   component("play"),
-  component("play-test") % Test
+  component("play-test") % Test,
+  component("play-ehcache") % Test
 )
 

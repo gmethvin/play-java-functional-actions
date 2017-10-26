@@ -18,6 +18,8 @@ package play.javadsl.functional.controllers;
 
 import akka.Done;
 import com.fasterxml.jackson.databind.JsonNode;
+import play.api.cache.Cached;
+import play.api.mvc.EssentialAction;
 import play.javadsl.functional.FunctionalAction;
 import play.javadsl.functional.FunctionalController;
 import play.mvc.BodyParser;
@@ -28,11 +30,13 @@ import java.util.concurrent.Executor;
 public class TestController extends FunctionalController {
 
     private BodyParser.Json jsonParser;
+    private Cached cached;
 
     @Inject
-    public TestController(BodyParser.Json jsonParser, Executor executor) {
+    public TestController(BodyParser.Json jsonParser, Cached cached, Executor executor) {
         super(executor);
         this.jsonParser = jsonParser;
+        this.cached = cached;
     }
 
     public FunctionalAction<Done> index() {
@@ -44,4 +48,13 @@ public class TestController extends FunctionalController {
             ok(jsonNode).withHeaders("Foo", "Bar")
         );
     }
+
+    // An example of how we can use the Scala helpers on Java functional actions
+    public EssentialAction getItem(String id) {
+        // we could probably create an interface with a helper method for this
+        return cached.apply(id).apply(action(req ->
+                ok("you got " + id)
+        ));
+    }
+
 }

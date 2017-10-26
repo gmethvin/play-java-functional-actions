@@ -28,6 +28,7 @@ class TestRouter @Inject()(testController: controllers.TestController) extends S
   override def routes: Routes = {
     case GET(p"/") => testController.index()
     case POST(p"/echo") => testController.echo()
+    case GET(p"/items/$id") => testController.getItem(id)
   }
 }
 

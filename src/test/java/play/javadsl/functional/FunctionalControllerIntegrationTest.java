@@ -64,4 +64,15 @@ public class FunctionalControllerIntegrationTest extends WithServer {
         final String body = contentAsString(result);
         assertThat(body, containsString("{\"foo\":10}"));
     }
+
+    @Test
+    public void testCachedGet() {
+        Http.RequestBuilder request = Helpers.fakeRequest()
+                .method(GET)
+                .uri("/items/" + 42);
+
+        Result result = route(app, request);
+        final String body = contentAsString(result);
+        assertThat(body, containsString("you got 42"));
+    }
 }
