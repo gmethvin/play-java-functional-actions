@@ -19,7 +19,7 @@ package play.javadsl.functional;
 import java.util.concurrent.*;
 import java.util.function.*;
 
-import akka.Done;
+import akka.NotUsed;
 import akka.util.ByteString;
 import play.libs.F;
 import play.libs.streams.Accumulator;
@@ -38,42 +38,58 @@ public interface FunctionalControllerHelpers extends Http.Status, Http.HeaderNam
     }
 
     /**
-     * @return an action returning a CompletionStage, that does not parse the body
+     * @return an action returning a CompletionStage that does not parse the body
      */
-    default FunctionalAction<Done> async(Function<Http.RequestHeader, CompletionStage<Result>> func) {
-        return FunctionalAction.create(new EmptyBodyParser(), actionExecutor(),
+    default FAction<NotUsed> async(Supplier<CompletionStage<Result>> func) {
+        return FAction.create(new EmptyBodyParser(), actionExecutor(), (req, body) -> func.get());
+    }
+
+    /**
+     * @return an action returning a Result directly that does not parse the body
+     */
+    default FAction<NotUsed> action(Supplier<Result> func) {
+        return FAction.create(new EmptyBodyParser(), actionExecutor(),
+            (req, body) -> CompletableFuture.completedFuture(func.get()));
+    }
+
+
+    /**
+     * @return an action returning a CompletionStage that does not parse the body
+     */
+    default FAction<NotUsed> async(Function<Http.RequestHeader, CompletionStage<Result>> func) {
+        return FAction.create(new EmptyBodyParser(), actionExecutor(),
                 (req, body) -> func.apply(req));
     }
 
     /**
-     * @return an action returning a Result directly, using the default body parser
+     * @return an action returning a Result directly that does not parse the body
      */
-    default FunctionalAction<Done> action(Function<Http.RequestHeader, Result> func) {
-        return FunctionalAction.create(new EmptyBodyParser(), actionExecutor(),
+    default FAction<NotUsed> action(Function<Http.RequestHeader, Result> func) {
+        return FAction.create(new EmptyBodyParser(), actionExecutor(),
                 (req, body) -> CompletableFuture.completedFuture(func.apply(req)));
     }
 
     /**
      * @return an action returning a CompletionStage, using the provided body parser.
      */
-    default <B> FunctionalAction<B> async(
-            BodyParser<B> parser, BiFunction<Http.Request, B, CompletionStage<Result>> func) {
-        return FunctionalAction.create(parser, actionExecutor(), func);
+    default <B> FAction<B> async(
+            BodyParser<B> parser, BiFunction<Http.RequestHeader, B, CompletionStage<Result>> func) {
+        return FAction.create(parser, actionExecutor(), func);
     }
 
     /**
      * @return an action returning a Result directly, using the provided body parser.
      */
-    default <B> FunctionalAction<B> action(
-            BodyParser<B> parser, BiFunction<Http.Request, B, Result> func) {
-        return FunctionalAction.create(parser, actionExecutor(),
+    default <B> FAction<B> action(
+            BodyParser<B> parser, BiFunction<Http.RequestHeader, B, Result> func) {
+        return FAction.create(parser, actionExecutor(),
                 (req, body) -> CompletableFuture.completedFuture(func.apply(req, body)));
     }
 
-    class EmptyBodyParser implements BodyParser<Done> {
+    class EmptyBodyParser implements BodyParser<NotUsed> {
         @Override
-        public Accumulator<ByteString, F.Either<Result, Done>> apply(Http.RequestHeader request) {
-            return Accumulator.done(F.Either.Right(Done.getInstance()));
+        public Accumulator<ByteString, F.Either<Result, NotUsed>> apply(Http.RequestHeader request) {
+            return Accumulator.done(F.Either.Right(NotUsed.getInstance()));
         }
     }
 }

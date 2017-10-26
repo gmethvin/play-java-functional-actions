@@ -16,16 +16,16 @@
 
 package play.javadsl.functional.controllers;
 
-import akka.Done;
+import javax.inject.Inject;
+import java.util.concurrent.Executor;
+
+import akka.NotUsed;
 import com.fasterxml.jackson.databind.JsonNode;
 import play.api.cache.Cached;
 import play.api.mvc.EssentialAction;
-import play.javadsl.functional.FunctionalAction;
+import play.javadsl.functional.FAction;
 import play.javadsl.functional.FunctionalController;
 import play.mvc.BodyParser;
-
-import javax.inject.Inject;
-import java.util.concurrent.Executor;
 
 public class TestController extends FunctionalController {
 
@@ -39,11 +39,11 @@ public class TestController extends FunctionalController {
         this.cached = cached;
     }
 
-    public FunctionalAction<Done> index() {
-        return action(req -> ok("Hello World"));
+    public FAction<NotUsed> index() {
+        return action(() -> ok("Hello World"));
     }
 
-    public FunctionalAction<JsonNode> echo() {
+    public FAction<JsonNode> echo() {
         return action(jsonParser, (req, jsonNode) ->
             ok(jsonNode).withHeaders("Foo", "Bar")
         );

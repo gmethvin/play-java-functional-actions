@@ -24,7 +24,7 @@ import java.util.function.*;
 import play.mvc.*;
 import play.libs.streams.*;
 
-public abstract class FunctionalAction<B> extends EssentialAction {
+public abstract class FAction<B> extends EssentialAction {
 
     /**
      * Apply the action to the body
@@ -33,7 +33,7 @@ public abstract class FunctionalAction<B> extends EssentialAction {
      * @param body the parsed body of the request
      * @return the future result of this action after parsing the body and running the action function
      */
-    public abstract CompletionStage<Result> apply(Http.Request request, B body);
+    public abstract CompletionStage<Result> apply(Http.RequestHeader request, B body);
 
     /**
      * @return the BodyParser used by this action
@@ -59,8 +59,7 @@ public abstract class FunctionalAction<B> extends EssentialAction {
                 return CompletableFuture.completedFuture(result);
             } else {
                 B body = either.right.get();
-                Http.Request request = new Http.RequestImpl(requestHeader.asScala().withBody(body));
-                return apply(request, body);
+                return apply(requestHeader, body);
             }
         }, executor());
     }
@@ -68,14 +67,14 @@ public abstract class FunctionalAction<B> extends EssentialAction {
     /**
      * Convenience method for creating a FunctionalAction from a function
      */
-    public static <B> FunctionalAction<B> create(
+    public static <B> FAction<B> create(
         BodyParser<B> parser,
         Executor executor,
-        BiFunction<Http.Request, B, CompletionStage<Result>> func
+        BiFunction<Http.RequestHeader, B, CompletionStage<Result>> func
     ) {
-        return new FunctionalAction<B>() {
+        return new FAction<B>() {
             @Override
-            public CompletionStage<Result> apply(Http.Request request, B body) {
+            public CompletionStage<Result> apply(Http.RequestHeader request, B body) {
                 return func.apply(request, body);
             }
 

@@ -12,7 +12,7 @@ Using `EssentialAction` for Java actions directly is much more straightforward t
 
 ## Example
 
-The current implementation uses a `FunctionalController` that provides an `action` and an `async` method for methods returning `Result` and `CompletionStage<Result>` respectively. By default, if a body parser is not passed as the first argument, an empty body parser is used, which returns `akka.Done`.
+The current implementation uses a `FunctionalController` that provides an `action` and an `async` method for methods returning `Result` and `CompletionStage<Result>` respectively. By default, if a body parser is not passed as the first argument, an empty body parser is used, which returns `akka.NotUsed`.
 
 For example:
 
@@ -27,11 +27,11 @@ public class TestController extends FunctionalController {
         this.jsonParser = jsonParser;
     }
 
-    public FunctionalAction<Done> index() {
-        return action(req -> ok("Hello World"));
+    public FAction<NotUsed> index() {
+        return action(() -> ok("Hello World"));
     }
 
-    public FunctionalAction<JsonNode> echo() {
+    public FAction<JsonNode> echo() {
         return action(jsonParser, (req, jsonNode) ->
             ok(jsonNode).withHeaders("Foo", "Bar")
         );
