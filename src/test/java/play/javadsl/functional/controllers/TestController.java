@@ -17,7 +17,6 @@
 package play.javadsl.functional.controllers;
 
 import javax.inject.Inject;
-import java.util.concurrent.Executor;
 
 import akka.NotUsed;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -33,8 +32,7 @@ public class TestController extends FunctionalController {
     private Cached cached;
 
     @Inject
-    public TestController(BodyParser.Json jsonParser, Cached cached, Executor executor) {
-        super(executor);
+    public TestController(BodyParser.Json jsonParser, Cached cached) {
         this.jsonParser = jsonParser;
         this.cached = cached;
     }

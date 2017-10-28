@@ -16,23 +16,12 @@
 
 package play.javadsl.functional;
 
-import java.util.concurrent.*;
-import javax.inject.Inject;
 import play.mvc.*;
 
 /**
  * A functional controller class that can be extended directly by users
  */
-public class FunctionalController extends Results implements FunctionalControllerHelpers {
-    private Executor executor;
-
-    @Inject
-    public FunctionalController(Executor executor) {
-        this.executor = executor;
-    }
-
-    @Override
-    public Executor actionExecutor() {
-        return executor;
-    }
+public class FunctionalController
+        extends Results
+        implements Http.Status, Http.HeaderNames, FunctionalControllerHelpers {
 }

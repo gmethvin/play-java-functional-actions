@@ -29,7 +29,7 @@ import play.mvc.BodyParser;
 /**
  * Helpers that can be mixed into a controller to provide functional action capabilities.
  */
-public interface FunctionalControllerHelpers extends Http.Status, Http.HeaderNames {
+public interface FunctionalControllerHelpers {
     /**
      * @return the executor to use to execute the action body.
      */

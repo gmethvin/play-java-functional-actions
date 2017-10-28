@@ -22,8 +22,7 @@ public class TestController extends FunctionalController {
     private BodyParser.Json jsonParser;
 
     @Inject
-    public TestController(BodyParser.Json jsonParser, Executor executor) {
-        super(executor);
+    public TestController(BodyParser.Json jsonParser) {
         this.jsonParser = jsonParser;
     }
 
